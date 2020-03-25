@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>Home Page for Digital Approval</title>
+</head>
+<body>
+    <div>
+        <div th:if="${message}">
+            <h2 th:text="${message}"/>
+        </div>
+    </div>
+    <div>
+        <form method="POST" enctype="multipart/form-data" th:object="${currentUser}" th:action="@{/uploadSuccess}">
+            <h1 th:inline="text">Hello! [[${currentUser}]]!</h1>
+            <label>Upload File</label>
+            <input type="file" name="file" />
+            <input type="submit" value="Upload" />
+        </form>
+    </div>
+</body>
+</html>
