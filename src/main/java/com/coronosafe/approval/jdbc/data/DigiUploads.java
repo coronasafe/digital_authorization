@@ -1,11 +1,7 @@
 package com.coronosafe.approval.jdbc.data;
 
-import org.hibernate.annotations.Generated;
-
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class DigiUploads {

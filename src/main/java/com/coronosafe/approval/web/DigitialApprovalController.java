@@ -1,9 +1,11 @@
 package com.coronosafe.approval.web;
 
 import com.coronosafe.approval.auth.UserDetailsServiceImpl;
+import com.coronosafe.approval.constants.DigiConstants;
 import com.coronosafe.approval.jdbc.data.DigiUser;
 import com.coronosafe.approval.service.DigiUploadService;
 import com.coronosafe.approval.service.DigiUserService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,23 +64,33 @@ public class DigitialApprovalController {
 
         DigiUser loggedInUser = digiUserService.findUser(((UserDetails) authentication.getPrincipal()).getUsername());
         model.addAttribute("currentUser", loggedInUser.getUserName());
+
+        if(loggedInUser!=null && DigiConstants.MISSION_DIRECTOR_ROLE.equals(loggedInUser.getRole().getRoleName())){
+            model.addAttribute("missionDirector", Boolean.TRUE);
+            model.addAttribute("uploads",digiUploadService.retrieveDigiUploads());
+        }
         return "upload";
     }
 
-    @PostMapping("/uploadSuccess")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirectAttributes, @ModelAttribute String userName) {
-        try {
-            digiUploadService.saveFile(file.getBytes(), LocalDateTime.now(),userName);
-            redirectAttributes.addFlashAttribute("message",
-                    "You successfully uploaded " + file.getOriginalFilename() + "!");
-        }catch (IOException ioEx){
-            log.error("IOException while uploading file "+file.getOriginalFilename());
-            redirectAttributes.addFlashAttribute("message",
-                    "Please upload the file again!");
-            return "upload";
+    @PostMapping("/success")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file,@RequestParam(required = false,name="id") Integer uploadId,
+                                   RedirectAttributes redirectAttributes, @RequestParam(required = false,name = "currentUser") String userName) {
+        if(uploadId!=null){
+            digiUploadService.updateSanctions(uploadId);
+        }else {
+            try {
+                log.info("The user name "+userName);
+                digiUploadService.saveFile(file, LocalDateTime.now(), userName);
+                redirectAttributes.addFlashAttribute("message",
+                        "You successfully uploaded " + file.getOriginalFilename() + "!");
+            } catch (IOException ioEx) {
+                log.error("IOException while uploading file " + file.getOriginalFilename());
+                redirectAttributes.addFlashAttribute("message",
+                        "Please upload the file again!");
+                return "upload";
+            }
         }
-        return "uploadSuccess";
+        return "success";
     }
 
 

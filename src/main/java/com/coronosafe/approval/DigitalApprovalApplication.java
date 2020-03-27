@@ -35,10 +35,10 @@ public class DigitalApprovalApplication{
             roleRepository.save(role2);
             roleRepository.save(role3);
 
-            DigiUser user1 = new DigiUser(1000,"inst1_first", "inst1_last", "inst1_user", passwordEncoder.encode("testInst1"));
-            DigiUser user2 = new DigiUser(1001,"director_first", "director_last", "director_user", passwordEncoder.encode("testDirector"));
-            DigiUser user3 = new DigiUser(1002,"officer_first", "officer_last", "officer_user", passwordEncoder.encode("testOfficer"));
-            DigiUser user = new DigiUser(1003,"test","last","testUser",passwordEncoder.encode("testUser"));
+            DigiUser user1 = new DigiUser(1000,"inst1_first", "inst1_last", "inst1_user", passwordEncoder.encode("testInst1"),"inst1@test.com","9638527415");
+            DigiUser user2 = new DigiUser(1001,"director_first", "director_last", "director_user", passwordEncoder.encode("testDirector"),"inst2@test.com","9876541235");
+            DigiUser user3 = new DigiUser(1002,"officer_first", "officer_last", "officer_user", passwordEncoder.encode("testOfficer"),"inst3@test.com","9517534568");
+            DigiUser user = new DigiUser(1003,"test","last","testUser",passwordEncoder.encode("testUser"),"testUser@test.com","8529635698");
 
 
             user.setRole(role);

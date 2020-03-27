@@ -16,17 +16,23 @@ public class DigiUser {
     @Column
     private String password;
     @Column
+    private String email;
+    @Column
+    private String mobileNumber;
+    @Column
     @Id
-    private long id;
+    private int id;
 
     protected DigiUser(){}
 
-    public DigiUser(long id,String firstName,String lastName,String userName,String password){
+    public DigiUser(int id,String firstName,String lastName,String userName,String password,String email,String mobileNumber){
         this.id =id;
         this.firstName=firstName;
         this.lastName=lastName;
         this.userName=userName;
         this.password=password;
+        this.email=email;
+        this.mobileNumber=mobileNumber;
     }
 
     public String getFirstName() {
@@ -69,12 +75,28 @@ public class DigiUser {
         this.password = password;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
     @Override
