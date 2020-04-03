@@ -21,12 +21,12 @@ public class DigiUser {
     private String mobileNumber;
     @Column
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
 
     protected DigiUser(){}
 
-    public DigiUser(int id,String firstName,String lastName,String userName,String password,String email,String mobileNumber){
-        this.id =id;
+    public DigiUser(String firstName,String lastName,String userName,String password,String email,String mobileNumber){
         this.firstName=firstName;
         this.lastName=lastName;
         this.userName=userName;
@@ -75,11 +75,11 @@ public class DigiUser {
         this.password = password;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

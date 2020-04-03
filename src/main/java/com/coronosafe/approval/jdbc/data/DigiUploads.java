@@ -7,8 +7,9 @@ import java.time.LocalDateTime;
 public class DigiUploads {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private int uploadId;
-    @Column
+    private long uploadId;
+    @Column(columnDefinition = "BLOB")
+    @Lob
     private byte[] uploadedFile;
     @Column
     private LocalDateTime uploadedDate;
@@ -22,11 +23,11 @@ public class DigiUploads {
         this.uploadedDate=uploadedDate;
     }
 
-    public int getUploadId() {
+    public long getUploadId() {
         return uploadId;
     }
 
-    public void setUploadId(int uploadId) {
+    public void setUploadId(long uploadId) {
         this.uploadId = uploadId;
     }
 

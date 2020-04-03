@@ -6,6 +6,8 @@ import com.coronosafe.approval.jdbc.data.DigiUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class DigiUserServiceImpl implements DigiUserService {
     @Autowired
@@ -13,6 +15,10 @@ public class DigiUserServiceImpl implements DigiUserService {
 
     @Override
     public DigiUser findUser(String userName) {
-        return digiUserRepository.findByUserName(userName);
+        Optional<DigiUser> digiUser =digiUserRepository.findByUserName(userName);
+        if(digiUser.isPresent()){
+            return digiUser.get();
+        }
+        return null;
     }
 }

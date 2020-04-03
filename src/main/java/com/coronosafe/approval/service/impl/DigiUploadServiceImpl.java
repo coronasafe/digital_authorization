@@ -1,7 +1,9 @@
 package com.coronosafe.approval.service.impl;
 
 import com.coronosafe.approval.constants.DigiConstants;
+import com.coronosafe.approval.docusign.DigiSignService;
 import com.coronosafe.approval.dto.DigiUploadDto;
+import com.coronosafe.approval.dto.DocuSignUserInfoDto;
 import com.coronosafe.approval.jdbc.DigiSanctionsRepository;
 import com.coronosafe.approval.jdbc.DigiUploadsRepository;
 import com.coronosafe.approval.jdbc.DigiUserRepository;
@@ -10,22 +12,14 @@ import com.coronosafe.approval.jdbc.data.DigiUploads;
 import com.coronosafe.approval.jdbc.data.DigiUser;
 import com.coronosafe.approval.service.DigiUploadService;
 import org.apache.commons.io.FileUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,6 +30,8 @@ import java.util.Optional;
 @Service
 public class DigiUploadServiceImpl implements DigiUploadService {
     private static final Logger log = LoggerFactory.getLogger(DigiUploadServiceImpl.class);
+
+
     @Autowired
     DigiUploadsRepository digiUploadsRepository;
     @Autowired
@@ -43,40 +39,28 @@ public class DigiUploadServiceImpl implements DigiUploadService {
     @Autowired
     DigiSanctionsRepository digiSanctionsRepository;
     @Autowired
-    private JavaMailSender javaMailSender;
+    private DigiSignService digiSignService;
 
     @Override
-    public void saveFile(MultipartFile file, LocalDateTime uploadDate, String userName) throws IOException {
+    public long saveFile(MultipartFile file, LocalDateTime uploadDate, String userName) throws IOException {
         log.info("Save the uploaded file");
-        DigiUser digiUser = digiUserRepository.findByUserName(userName);
-        DigiUploads digiUploads = new DigiUploads(file.getBytes(),uploadDate);
-        digiUploads.setDigiUser(digiUser);
-        digiUploadsRepository.save(digiUploads);
+        long uploadId = 0;
+        Optional<DigiUser> digiUser = digiUserRepository.findByUserName(userName);
+        if(digiUser.isPresent()) {
+            DigiUploads digiUploads = new DigiUploads(file.getBytes(), uploadDate);
+            digiUploads.setDigiUser(digiUser.get());
+            DigiUploads uploadedFile = digiUploadsRepository.save(digiUploads);
 
-        DigiSanctions digiSanctions = new DigiSanctions(Boolean.FALSE,file.getOriginalFilename());
-        digiSanctions.setDigiUploads(digiUploads);
-        digiSanctionsRepository.save(digiSanctions);
-        sendUploadEmail(file);
-    }
+            DigiSanctions digiSanctions = new DigiSanctions(Boolean.FALSE, file.getOriginalFilename());
+            digiSanctions.setDigiUploads(digiUploads);
+            digiSanctionsRepository.save(digiSanctions);
+            uploadId = uploadedFile.getUploadId();
 
-    public void sendUploadEmail(MultipartFile file) {
-
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            DigiUser user = digiUserRepository.findDigiUserFromRole(DigiConstants.MISSION_DIRECTOR_ROLE);
-            helper.setTo(user.getEmail());
-            helper.setText("A document has been sent for your review");
-            ByteArrayResource byteArrayResource = new ByteArrayResource(file.getBytes());
-            helper.addAttachment(file.getOriginalFilename(),byteArrayResource);
-
-            javaMailSender.send(message);
-        }catch(MessagingException mse){
-            log.error("MessagingException while sending email to the State Mission Director: "+mse);
-        }catch(IOException ioe){
-            log.error("IOException while sending email to the State Mission Director: "+ioe);
         }
+        return uploadId;
     }
+
+
 
     @Override
     public List<DigiUploadDto> retrieveDigiUploads() {
@@ -90,11 +74,14 @@ public class DigiUploadServiceImpl implements DigiUploadService {
             List<DigiUploads> uploadsList = optionalUploadList.get();
             uploadsList.forEach(uploads -> {
                 try {
-                DigiSanctions digiSanctions = digiSanctionsRepository.findByDigiUploads(uploads.getUploadId());
-                File uploadedFile = new File("./uploads/" + digiSanctions.getFileName());
-                FileUtils.writeByteArrayToFile(uploadedFile, uploads.getUploadedFile());
-                DigiUploadDto uploadDto = new DigiUploadDto(uploads.getUploadId(), digiSanctions.getFileName(), digiSanctions.getSanctionStatus().booleanValue(),uploadedFile.getAbsolutePath());
-                uploadDtoList.add(uploadDto);
+                Optional<DigiSanctions> digiSanctions = digiSanctionsRepository.findByDigiUploads(uploads.getUploadId());
+                if(digiSanctions.isPresent()) {
+                    DigiSanctions digiSanctionsObj = digiSanctions.get();
+                    File uploadedFile = new File("./uploads/" + digiSanctionsObj.getFileName());
+                    FileUtils.writeByteArrayToFile(uploadedFile, uploads.getUploadedFile());
+                    DigiUploadDto uploadDto = new DigiUploadDto(uploads.getUploadId(), digiSanctionsObj.getFileName(), digiSanctionsObj.getSanctionStatus().booleanValue(), "/uploads/" + digiSanctionsObj.getFileName());
+                    uploadDtoList.add(uploadDto);
+                }
             }catch(IOException ioe){
                 log.error("IOException while writing to the file "+ioe);
             }
@@ -106,24 +93,45 @@ public class DigiUploadServiceImpl implements DigiUploadService {
     }
 
     @Override
-    public void updateSanctions(int uploadId) {
-        DigiSanctions digiSanctions = digiSanctionsRepository.findByDigiUploads(uploadId);
+    public void updateSanctions(long uploadId) {
+        DigiSanctions digiSanctions = getDigiSanctionsFromUploadId(uploadId);
         digiSanctions.setSanctionStatus(Boolean.TRUE);
         digiSanctionsRepository.save(digiSanctions);
-        sendSanctionedEmail();
     }
 
-    public void sendSanctionedEmail() {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            DigiUser user = digiUserRepository.findDigiUserFromRole(DigiConstants.OFFICIAL_ROLE);
-            helper.setTo(user.getEmail());
-            helper.setText("State Mission Director has reviewed a request to set up at CCC at so and so location");
 
-            javaMailSender.send(message);
-        }catch(MessagingException mse){
-            log.error("MessagingException while sending email to the Government Official: "+mse);
+    /**
+     * Method to request for the digital signature
+     * @param authCode
+     * @param emailUniqueId - can be upload id or sanction id
+     * @param userName
+     * @param redirect - url to which redirect has to be happen after signing
+     * @return
+     */
+    @Override
+    public Object prepareEmailWithSignature(String authCode,long emailUniqueId,String userName, String redirect){
+        Optional<DigiUser> digiUser = digiUserRepository.findByUserName(userName);
+        if(digiUser.isPresent()) {
+            String accessToken = digiSignService.getAccessToken(authCode).getAccess_token();
+            DocuSignUserInfoDto docuSignUserInfoDto = digiSignService.getUserInfo(accessToken);
+            return digiSignService.prepareDocumentSignature(DigiConstants.EMAIL_MISSION_DIRECTOR,
+                    ((Long) emailUniqueId).toString(),
+                    digiUser.get(), accessToken, docuSignUserInfoDto, redirect);
         }
+        return null;
+    }
+
+    /**
+     * Method to get the sanction details from uploadId
+     * @param uploadId
+     * @return
+     */
+    @Override
+    public DigiSanctions getDigiSanctionsFromUploadId(long uploadId) {
+        Optional<DigiSanctions> digiSanctions = digiSanctionsRepository.findByDigiUploads(uploadId);
+        if(digiSanctions.isPresent()){
+            return digiSanctions.get();
+        }
+        return null;
     }
 }

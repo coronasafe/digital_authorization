@@ -1,20 +1,16 @@
 package com.coronosafe.approval.jdbc.data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 @Entity
 public class DigiUserRole {
     @Id
-    @Column
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long role_id;
     @Column
     private String roleName;
 
-    public DigiUserRole(long roleId, String roleName){
-        this.role_id = roleId;
+    public DigiUserRole(String roleName){
         this.roleName=roleName;
     }
 

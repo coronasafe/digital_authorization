@@ -1,25 +1,23 @@
 package com.coronosafe.approval.dto;
 
-import java.io.File;
-
 public class DigiUploadDto {
-    private int uploadId;
+    private long uploadId;
     private String fileName;
     private boolean sanctionStatus;
     private String uploadedFile;
 
-    public DigiUploadDto(int uploadId,String fileName,boolean sanctionStatus,String uploadedFile){
+    public DigiUploadDto(long uploadId,String fileName,boolean sanctionStatus,String uploadedFile){
         this.uploadId=uploadId;
         this.fileName=fileName;
         this.sanctionStatus=sanctionStatus;
         this.uploadedFile=uploadedFile;
     }
 
-    public int getUploadId() {
+    public long getUploadId() {
         return uploadId;
     }
 
-    public void setUploadId(int uploadId) {
+    public void setUploadId(long uploadId) {
         this.uploadId = uploadId;
     }
 

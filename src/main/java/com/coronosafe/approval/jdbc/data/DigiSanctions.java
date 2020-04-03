@@ -6,7 +6,7 @@ import javax.persistence.*;
 public class DigiSanctions {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private long id;
     @Column(columnDefinition = "boolean default false")
     private Boolean sanctionStatus;
     @Column
@@ -21,11 +21,11 @@ public class DigiSanctions {
        this.fileName=fileName;
    }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

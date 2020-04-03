@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -25,10 +26,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         log.info("Loading user details");
-        DigiUser user = digiUserRepository.findByUserName(userName);
-        if(user!=null){
+        Optional<DigiUser> user = digiUserRepository.findByUserName(userName);
+        if(user.isPresent()){
             log.info("Found the user "+userName);
-            return User.withUsername(userName).password(user.getPassword()).roles(user.getRole().getRoleName()).build();
+            return User.withUsername(userName).password(user.get().getPassword())
+                    .roles(user.get().getRole().getRoleName()).build();
         }else{
             log.info("No user with this userName");
             throw new UsernameNotFoundException(userName);
