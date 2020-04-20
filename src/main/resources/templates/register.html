@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>Register Page for Digital Approval</title>
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+</head>
+<body>
+<h1>Please enter you details to register as a user in this system</h1>
+    <div>
+        <form th:object="${registerUser}" th:action="@{/addUser}" method="post">
+            <div>
+                <label> User First Name : <input type="text" name="firstName"/> </label>
+                <div><span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" /></div>
+            </div>
+            <div><label> User Last Name : <input type="text" name="lastName"/> </label></div>
+            <div><span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" /></div>
+            <div>
+                <label> User Role</label>
+                <select name="roleId">
+                    <option th:each="role : ${roleList}" th:value="${role.role_id}"
+                            th:text="${role.roleName}">
+                    </option>
+                </select>
+            </div>
+            <div><label> Username : <input type="text" name="userName"/> </label></div>
+            <div><span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" /></div>
+            <div><label> User Password : <input type="password" name="password"/> </label></div>
+            <div><span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" /></div>
+            <div><label> User Email : <input type="text" name="email"/> </label></div>
+            <div><span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" /></div>
+            <div><label> User Mobile : <input type="number" name="mobile"/> </label></div>
+            <div><span th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}" /></div>
+
+            <div><input type="submit" value="Register"/></div>
+        </form>
+    </div>
+</body>
+</html>

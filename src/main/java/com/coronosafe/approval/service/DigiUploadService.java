@@ -23,4 +23,6 @@ public interface DigiUploadService {
 
     DigiSanctions getDigiSanctionsFromUploadId(long uploadId);
 
+    DigiUploads getUploadedFile(long uploadedId);
+
 }

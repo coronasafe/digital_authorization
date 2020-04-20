@@ -9,16 +9,13 @@ public class DigiSanctions {
     private long id;
     @Column(columnDefinition = "boolean default false")
     private Boolean sanctionStatus;
-    @Column
-    private String fileName;
     @OneToOne
     private DigiUploads digiUploads;
 
    protected DigiSanctions(){}
 
-   public DigiSanctions(Boolean sanctionStatus,String fileName){
+   public DigiSanctions(Boolean sanctionStatus){
        this.sanctionStatus=sanctionStatus;
-       this.fileName=fileName;
    }
 
     public long getId() {
@@ -35,14 +32,6 @@ public class DigiSanctions {
 
     public void setSanctionStatus(Boolean sanctionStatus) {
         this.sanctionStatus = sanctionStatus;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public DigiUploads getDigiUploads() {

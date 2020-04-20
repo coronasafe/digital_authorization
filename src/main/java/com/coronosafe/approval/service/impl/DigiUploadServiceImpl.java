@@ -47,11 +47,11 @@ public class DigiUploadServiceImpl implements DigiUploadService {
         long uploadId = 0;
         Optional<DigiUser> digiUser = digiUserRepository.findByUserName(userName);
         if(digiUser.isPresent()) {
-            DigiUploads digiUploads = new DigiUploads(file.getBytes(), uploadDate);
+            DigiUploads digiUploads = new DigiUploads(file.getBytes(), uploadDate,file.getOriginalFilename());
             digiUploads.setDigiUser(digiUser.get());
             DigiUploads uploadedFile = digiUploadsRepository.save(digiUploads);
 
-            DigiSanctions digiSanctions = new DigiSanctions(Boolean.FALSE, file.getOriginalFilename());
+            DigiSanctions digiSanctions = new DigiSanctions(Boolean.FALSE);
             digiSanctions.setDigiUploads(digiUploads);
             digiSanctionsRepository.save(digiSanctions);
             uploadId = uploadedFile.getUploadId();
@@ -73,18 +73,13 @@ public class DigiUploadServiceImpl implements DigiUploadService {
             List<DigiUploadDto> uploadDtoList = new ArrayList<>();
             List<DigiUploads> uploadsList = optionalUploadList.get();
             uploadsList.forEach(uploads -> {
-                try {
                 Optional<DigiSanctions> digiSanctions = digiSanctionsRepository.findByDigiUploads(uploads.getUploadId());
                 if(digiSanctions.isPresent()) {
                     DigiSanctions digiSanctionsObj = digiSanctions.get();
-                    File uploadedFile = new File("./uploads/" + digiSanctionsObj.getFileName());
-                    FileUtils.writeByteArrayToFile(uploadedFile, uploads.getUploadedFile());
-                    DigiUploadDto uploadDto = new DigiUploadDto(uploads.getUploadId(), digiSanctionsObj.getFileName(), digiSanctionsObj.getSanctionStatus().booleanValue(), "/uploads/" + digiSanctionsObj.getFileName());
+                    DigiUploadDto uploadDto = new DigiUploadDto(uploads.getUploadId(), uploads.getFileName(),
+                            digiSanctionsObj.getSanctionStatus().booleanValue());
                     uploadDtoList.add(uploadDto);
-                }
-            }catch(IOException ioe){
-                log.error("IOException while writing to the file "+ioe);
-            }
+                 }
             });
             return uploadDtoList;
         }
@@ -131,6 +126,16 @@ public class DigiUploadServiceImpl implements DigiUploadService {
         Optional<DigiSanctions> digiSanctions = digiSanctionsRepository.findByDigiUploads(uploadId);
         if(digiSanctions.isPresent()){
             return digiSanctions.get();
+        }
+        return null;
+    }
+
+    @Override
+    public DigiUploads getUploadedFile(long uploadedId) {
+        Optional<DigiUploads> uploadedFile = digiUploadsRepository.findById(uploadedId);
+        if(uploadedFile.isPresent()){
+            log.debug("Got the requested file to be downloaded");
+            return uploadedFile.get();
         }
         return null;
     }

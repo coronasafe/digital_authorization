@@ -4,13 +4,11 @@ public class DigiUploadDto {
     private long uploadId;
     private String fileName;
     private boolean sanctionStatus;
-    private String uploadedFile;
 
-    public DigiUploadDto(long uploadId,String fileName,boolean sanctionStatus,String uploadedFile){
+    public DigiUploadDto(long uploadId,String fileName,boolean sanctionStatus){
         this.uploadId=uploadId;
         this.fileName=fileName;
         this.sanctionStatus=sanctionStatus;
-        this.uploadedFile=uploadedFile;
     }
 
     public long getUploadId() {
@@ -35,13 +33,5 @@ public class DigiUploadDto {
 
     public void setSanctionStatus(boolean sanctionStatus) {
         this.sanctionStatus = sanctionStatus;
-    }
-
-    public String getUploadedFile() {
-        return uploadedFile;
-    }
-
-    public void setUploadedFile(String uploadedFile) {
-        this.uploadedFile = uploadedFile;
     }
 }

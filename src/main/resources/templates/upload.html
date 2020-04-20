@@ -26,14 +26,16 @@
                     </tr>
                 </thead>
                 <tr th:each="upload: ${uploads}">
-                    <td th:text="${upload.uploadId}" th:name="id" th:value="${upload.uploadId}"/>
+                    <td th:text="${upload.uploadId}"/>
                     <td th:text="${upload.fileName}"/>
-                    <td ><a th:href="${upload.uploadedFile}" download>Review</a></td>
+                    <td ><a th:href="${'/download/'+upload.uploadId}" download>Review</a></td>
                     <td th:if="${upload.sanctionStatus}"><span th:text="Approved"/></td>
                     <td th:unless="${upload.sanctionStatus}"><input type="submit" name="sanction" value="Sanction"/></td>
+                    <input type="hidden" th:name="id" th:value="${upload.uploadId}"/>
                 </tr>
             </table>
             <input type="hidden" th:name="currentUser" th:value="${currentUser}"/>
+
         </form>
     </div>
     <div th:unless="${missionDirector}">

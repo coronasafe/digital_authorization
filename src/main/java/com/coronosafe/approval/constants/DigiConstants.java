@@ -26,4 +26,12 @@ public interface DigiConstants {
 
     String URL_SEPERATOR="/";
     String JSON_USER_INFO="accounts";
+
+    String CONTENT_TYPE="application/octet-stream";
+
+    interface REGISTRATION {
+        String ROLES_LIST="roleList";
+        String REGISTER_USER="registerUser";
+        String REGISTERED_USER="registeredUser";
+    }
 }

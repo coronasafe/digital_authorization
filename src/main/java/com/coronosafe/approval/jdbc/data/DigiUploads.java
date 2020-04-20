@@ -15,12 +15,15 @@ public class DigiUploads {
     private LocalDateTime uploadedDate;
     @OneToOne
     private DigiUser digiUser;
+    @Column
+    private String fileName;
 
     protected DigiUploads(){}
 
-    public DigiUploads(byte[] uploadedFile,LocalDateTime uploadedDate){
+    public DigiUploads(byte[] uploadedFile,LocalDateTime uploadedDate,String fileName){
         this.uploadedFile=uploadedFile;
         this.uploadedDate=uploadedDate;
+        this.fileName=fileName;
     }
 
     public long getUploadId() {
@@ -53,5 +56,13 @@ public class DigiUploads {
 
     public void setDigiUser(DigiUser digiUser) {
         this.digiUser = digiUser;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
